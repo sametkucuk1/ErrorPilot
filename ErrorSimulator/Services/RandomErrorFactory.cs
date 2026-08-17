@@ -2,9 +2,10 @@ namespace ErrorSimulator.Services;
 
 public static class RandomErrorFactory
 {
+    // Application Insights bir istisnayı ancak gerçekten fırlatılıp yakalandığında
+    // stack trace ile birlikte kaydediyor; bu yüzden hatayı burada fırlatıp yakalıyoruz.
     public static Exception CreateAndLog(ILogger logger, string source)
     {
-       
         try
         {
             throw Create();
