@@ -1,11 +1,24 @@
+using System.Text.RegularExpressions;
 using ErrorPilotEngine.Models;
 
 namespace ErrorPilotEngine.Services;
 
 internal static class SlackMessageBuilder
 {
+    // Gemini standart Markdown üretiyor: kalın yazı için "**metin**", madde başı için "* ".
+    // Slack ise mrkdwn kullandığından bu işaretleri biçimlendirmeden, olduğu gibi yazdırıyor.
+    // Mesajın okunabilir kalması için gönderim öncesi Slack'in beklediği biçime çeviriyoruz.
+    private static readonly Regex BoldPattern = new(@"\*\*(.+?)\*\*", RegexOptions.Compiled);
+
+    private static readonly Regex BulletPattern = new(
+        @"^[ \t]*[*-][ \t]+",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
     private const string UnknownValue = "bilinmiyor";
     private const string TruncationSuffix = "...";
+
+    // Slack Block Kit'in karakter sınırları. Aşılırsa webhook mesajı reddediyor,
+    // bu yüzden metinleri gönderim öncesi kısaltıyoruz.
     private const int MaxHeaderLength = 150;
     private const int MaxFieldLength = 2000;
     private const int MaxErrorMessageLength = 400;
@@ -16,7 +29,9 @@ internal static class SlackMessageBuilder
         var error = analyzedError.Error;
         var errorType = Fallback(error.Type);
         var errorMessage = Truncate(Fallback(error.Message), MaxErrorMessageLength);
-        var analysis = Truncate(Fallback(analyzedError.Analysis), MaxAnalysisLength);
+        var analysis = Truncate(
+            ToSlackMarkdown(Fallback(analyzedError.Analysis)),
+            MaxAnalysisLength);
 
         return new SlackMessage
         {
@@ -96,6 +111,13 @@ internal static class SlackMessageBuilder
             .Replace("&", "&amp;")
             .Replace("<", "&lt;")
             .Replace(">", "&gt;");
+    }
+
+    private static string ToSlackMarkdown(string value)
+    {
+        var converted = BoldPattern.Replace(value, "*$1*");
+
+        return BulletPattern.Replace(converted, "• ");
     }
 
     private static string Fallback(string? value)
