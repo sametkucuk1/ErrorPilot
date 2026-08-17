@@ -38,7 +38,7 @@ Zincirin sonunda `#errorpilot-alerts` kanalına düşen bildirim: hatanın tipi,
 
 ![ErrorPilot'un Slack kanalına gönderdiği hata bildirimi](docs/slack-bildirimi.png)
 
-Sistemin uçtan uca çalışmasını gösteren sunum videosu: [docs/sunumvideosu.mp4](docs/sunumvideosu.mp4)
+Sistemin uçtan uca çalışmasını gösteren sunum videosu: [sunumvideosu.mp4](sunumvideosu.mp4)
 
 ## Bileşenler
 
