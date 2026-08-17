@@ -1,6 +1,12 @@
 @ErrorPilotEngine_HostAddress = http://localhost:5261
 
+### Son 10 hatayı analiz etmeden döndürür.
 GET {{ErrorPilotEngine_HostAddress}}/api/errors/latest
+Accept: application/json
+
+### Yeni hataları çeker, Gemini ile analiz ettirir ve Slack'e bildirir.
+### İşlenen hatalar işaretlendiği için ikinci çağrı boş rapor döndürür.
+GET {{ErrorPilotEngine_HostAddress}}/api/errors/analyzed
 Accept: application/json
 
 ###

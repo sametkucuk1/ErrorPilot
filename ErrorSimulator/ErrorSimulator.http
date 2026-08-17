@@ -1,5 +1,6 @@
 @ErrorSimulator_HostAddress = http://localhost:5049
 
+### Zamanlayıcıyı beklemeden anında rastgele bir hata üretir.
 GET {{ErrorSimulator_HostAddress}}/api/errors/trigger
 Accept: application/json
 

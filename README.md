@@ -39,21 +39,33 @@ ErrorPilotEngine, aynı hatayı iki kez işlememek için bir watermark mekanizma
 | ErrorSimulator | Sahte hata üretimi, Application Insights'a telemetri gönderimi | Yerel geliştirme makinesi |
 | ErrorPilotEngine | Log okuma, AI analizi, Slack bildirimi | Azure App Service |
 
-## Uç Noktalar (ErrorPilotEngine)
+## Uç Noktalar
+
+**ErrorPilotEngine**
 
 - `GET /api/errors/latest` — Log Analytics'teki son 10 hatayı, analiz yapmadan döndürür.
-- `GET /api/errors/analyzed` — yeni hataları çeker, Gemini ile analiz ettirir, Slack'e bildirir.
+- `GET /api/errors/analyzed` — yeni hataları çeker, Gemini ile analiz ettirir, Slack'e bildirir. Arka plandaki zamanlayıcı ile aynı işi yapar; işlenen hatalar işaretlendiği için arka arkaya iki çağrının ikincisi boş rapor döndürür.
+
+**ErrorSimulator**
+
+- `GET /api/errors/trigger` — zamanlayıcıyı beklemeden anında rastgele bir hata üretir. Demo sırasında zincirin tamamını tetiklemek için kullanılıyor.
+
+Her iki projede de Swagger arayüzü yalnızca Development ortamında açık; Azure'a deploy edilen sürümde `/swagger` kapalıdır, uç noktalara doğrudan istek atılması gerekir.
 
 ## Çalıştırma
 
-Her iki proje de kendi klasöründen bağımsız olarak çalıştırılabilir:
+Çözüm dosyası kök dizinde: `ErrorPilot.sln`. Projeler birbirine bağlı olmadığı için ayrı ayrı da çalıştırılabilir:
 
 ```bash
 dotnet run --project ErrorSimulator
 dotnet run --project ErrorPilotEngine
 ```
 
-ErrorPilotEngine'in çalışabilmesi için üç ayarın user-secrets ya da ortam değişkeni olarak tanımlanması gerekiyor:
+### Gerekli ayarlar
+
+Hiçbir gizli değer kod deposunda tutulmuyor; hepsi user-secrets ya da ortam değişkeni olarak veriliyor. `appsettings.json` içindeki karşılıkları boş bırakılmış durumda.
+
+ErrorPilotEngine için:
 
 ```
 LogAnalytics:WorkspaceId
@@ -61,11 +73,36 @@ Gemini:ApiKey
 Slack:WebhookUrl
 ```
 
-Bu değerlerin hiçbiri kod deposunda bulunmuyor.
+ErrorSimulator için:
+
+```
+ApplicationInsights:ConnectionString
+```
+
+Örnek:
+
+```bash
+dotnet user-secrets --project ErrorPilotEngine set "Gemini:ApiKey" "<anahtar>"
+```
+
+Bu ayarların eksik olması iki projede farklı sonuç veriyor. ErrorPilotEngine, ayarları başlangıçta doğruladığı için eksik değerle **hiç açılmaz** ve hangi ayarın eksik olduğunu söyleyen bir hata verir. ErrorSimulator ise sorunsuz açılır, hata üretmeye de devam eder; ancak bağlantı dizesi olmadan telemetri Azure'a ulaşmaz. Bu sessiz durumu fark etmek zor olduğu için uygulama başlangıçta bir uyarı logu yazıyor.
+
+Azure'a deploy edilen ErrorPilotEngine, Log Analytics'e erişirken Managed Identity kullandığından orada yalnızca `Gemini:ApiKey` ve `Slack:WebhookUrl` uygulama ayarı olarak tanımlanıyor.
 
 ## Dağıtım
 
 `main` branch'ine yapılan her push, GitHub Actions üzerinden ErrorPilotEngine'i derleyip Azure App Service'e otomatik olarak deploy ediyor. Uygulama, Azure'daki Log Analytics'e erişirken herhangi bir şifre veya anahtar saklamak yerine sistem tarafından atanmış bir Managed Identity kullanıyor; bu kimliğe yalnızca ilgili çalışma alanında okuma yetkisi (Log Analytics Reader) veriliyor.
+
+## Bilinen Sınırlamalar
+
+Projenin demo kapsamında bilinçli olarak dışarıda bırakılan ya da basit tutulan noktaları:
+
+- **Watermark bellekte tutuluyor.** Uygulama yeniden başladığında işaretçi o anki zamana sıfırlanıyor; yeniden başlatma sırasında oluşan hatalar atlanabiliyor. Kalıcı bir depo (ör. tablo ya da blob) bu sorunu çözerdi.
+- **Tek instance varsayımı.** App Service birden fazla instance'a ölçeklenirse her instance kendi işaretçisini tutacağı için aynı hata Slack'e birden fazla kez düşebilir.
+- **Sorgu kesin büyüktür (`>`) kullanıyor.** İşaretçiyle tam olarak aynı zaman damgasına sahip ikinci bir hata bir sonraki turda çekilmiyor. Uygulamada zaman damgaları milisaniye çözünürlüğünde olduğu için pratikte nadir bir durum.
+- **Uç noktalarda kimlik doğrulaması yok.** Adresi bilen herkes `/api/errors/analyzed` çağırarak Gemini kotasını tüketebilir veya Slack kanalına mesaj düşürebilir. Ödev kapsamında yeterli görüldü; gerçek bir kullanımda en azından bir API anahtarı kontrolü gerekir.
+- **Gemini kota sınırı.** Ücretsiz kotada HTTP 429 alındığında yeniden deneme yapılmıyor; o turdaki kalan hatalar "atlandı" olarak raporlanıyor ve bir sonraki tura bırakılıyor.
+- **Otomatik test bulunmuyor.** Doğrulama, iki projenin birlikte çalıştırılıp Slack'e düşen mesajların gözlenmesiyle yapıldı.
 
 ## Kullanılan Teknolojiler
 
