@@ -95,14 +95,14 @@ Azure'a deploy edilen ErrorPilotEngine, Log Analytics'e erişirken Managed Ident
 
 ## Bilinen Sınırlamalar
 
-Projenin demo kapsamında bilinçli olarak dışarıda bırakılan ya da basit tutulan noktaları:
+Demo kapsamında bilinçli olarak basit tutulan ya da dışarıda bırakılan noktalar aşağıda toplandı.
 
-- **Watermark bellekte tutuluyor.** Uygulama yeniden başladığında işaretçi o anki zamana sıfırlanıyor; yeniden başlatma sırasında oluşan hatalar atlanabiliyor. Kalıcı bir depo (ör. tablo ya da blob) bu sorunu çözerdi.
-- **Tek instance varsayımı.** App Service birden fazla instance'a ölçeklenirse her instance kendi işaretçisini tutacağı için aynı hata Slack'e birden fazla kez düşebilir.
-- **Sorgu kesin büyüktür (`>`) kullanıyor.** İşaretçiyle tam olarak aynı zaman damgasına sahip ikinci bir hata bir sonraki turda çekilmiyor. Uygulamada zaman damgaları milisaniye çözünürlüğünde olduğu için pratikte nadir bir durum.
-- **Uç noktalarda kimlik doğrulaması yok.** Adresi bilen herkes `/api/errors/analyzed` çağırarak Gemini kotasını tüketebilir veya Slack kanalına mesaj düşürebilir. Ödev kapsamında yeterli görüldü; gerçek bir kullanımda en azından bir API anahtarı kontrolü gerekir.
-- **Gemini kota sınırı.** Ücretsiz kotada HTTP 429 alındığında yeniden deneme yapılmıyor; o turdaki kalan hatalar "atlandı" olarak raporlanıyor ve bir sonraki tura bırakılıyor.
-- **Otomatik test bulunmuyor.** Doğrulama, iki projenin birlikte çalıştırılıp Slack'e düşen mesajların gözlenmesiyle yapıldı.
+- **Watermark bellekte tutuldu.** Kalıcı bir depo yerine bellek tercih edildiği için uygulama her yeniden başladığında işaretçi o anki zamana sıfırlanıyor ve yeniden başlatma sırasında oluşan hatalar atlanabiliyor. Kalıcı bir depoya (ör. tablo ya da blob) taşınarak giderilebilir.
+- **Tek instance varsayımıyla yazıldı.** App Service birden fazla instance'a ölçeklendiğinde her instance kendi işaretçisini tutacağı için aynı hata Slack'e birden fazla kez düşebilir.
+- **Sorguda kesin büyüktür (`>`) karşılaştırması kullanıldı.** İşaretçiyle tam olarak aynı zaman damgasına sahip ikinci bir hata bir sonraki turda çekilmiyor. Zaman damgaları milisaniye çözünürlüğünde olduğu için pratikte nadir görülen bir durum olarak değerlendirildi.
+- **Uç noktalara kimlik doğrulaması eklenmedi.** Adresi bilen herkes `/api/errors/analyzed` çağırarak Gemini kotasını tüketebilir veya Slack kanalına mesaj düşürebilir. Ödev kapsamında yeterli görüldü; gerçek bir kullanımda en azından bir API anahtarı kontrolü eklenmeli.
+- **Kota sınırına takılınca yeniden deneme yapılmadı.** Gemini'den HTTP 429 alındığında o turdaki kalan hatalar "atlandı" olarak raporlanıp bir sonraki tura bırakılıyor.
+- **Otomatik test yazılmadı.** Doğrulama, iki proje birlikte çalıştırılıp Slack'e düşen mesajlar gözlenerek yapıldı.
 
 ## Kullanılan Teknolojiler
 
