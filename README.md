@@ -32,6 +32,14 @@ Slack — formatlı bir mesaj olarak ekibe düşer
 
 ErrorPilotEngine, aynı hatayı iki kez işlememek için bir watermark mekanizması kullanıyor: her sorgudan sonra en son işlediği hatanın zamanını bellekte tutuyor ve bir sonraki sorguda sadece ondan sonrasını istiyor.
 
+## Örnek Çıktı
+
+Zincirin sonunda `#errorpilot-alerts` kanalına düşen bildirim: hatanın tipi, oluştuğu uygulama ve zaman bilgisi, hata mesajı ve Gemini'nin ürettiği Türkçe çözüm önerisi.
+
+![ErrorPilot'un Slack kanalına gönderdiği hata bildirimi](docs/slack-bildirimi.png)
+
+Sistemin uçtan uca çalışmasını gösteren sunum videosu: [docs/sunumvideosu.mp4](docs/sunumvideosu.mp4)
+
 ## Bileşenler
 
 | Proje | Sorumluluk | Barındığı Yer |
@@ -92,17 +100,6 @@ Azure'a deploy edilen ErrorPilotEngine, Log Analytics'e erişirken Managed Ident
 ## Dağıtım
 
 `main` branch'ine yapılan her push, GitHub Actions üzerinden ErrorPilotEngine'i derleyip Azure App Service'e otomatik olarak deploy ediyor. Uygulama, Azure'daki Log Analytics'e erişirken herhangi bir şifre veya anahtar saklamak yerine sistem tarafından atanmış bir Managed Identity kullanıyor; bu kimliğe yalnızca ilgili çalışma alanında okuma yetkisi (Log Analytics Reader) veriliyor.
-
-## Bilinen Sınırlamalar
-
-Demo kapsamında bilinçli olarak basit tutulan ya da dışarıda bırakılan noktalar aşağıda toplandı.
-
-- **Watermark bellekte tutuldu.** Kalıcı bir depo yerine bellek tercih edildiği için uygulama her yeniden başladığında işaretçi o anki zamana sıfırlanıyor ve yeniden başlatma sırasında oluşan hatalar atlanabiliyor. Kalıcı bir depoya (ör. tablo ya da blob) taşınarak giderilebilir.
-- **Tek instance varsayımıyla yazıldı.** App Service birden fazla instance'a ölçeklendiğinde her instance kendi işaretçisini tutacağı için aynı hata Slack'e birden fazla kez düşebilir.
-- **Sorguda kesin büyüktür (`>`) karşılaştırması kullanıldı.** İşaretçiyle tam olarak aynı zaman damgasına sahip ikinci bir hata bir sonraki turda çekilmiyor. Zaman damgaları milisaniye çözünürlüğünde olduğu için pratikte nadir görülen bir durum olarak değerlendirildi.
-- **Uç noktalara kimlik doğrulaması eklenmedi.** Adresi bilen herkes `/api/errors/analyzed` çağırarak Gemini kotasını tüketebilir veya Slack kanalına mesaj düşürebilir. Ödev kapsamında yeterli görüldü; gerçek bir kullanımda en azından bir API anahtarı kontrolü eklenmeli.
-- **Kota sınırına takılınca yeniden deneme yapılmadı.** Gemini'den HTTP 429 alındığında o turdaki kalan hatalar "atlandı" olarak raporlanıp bir sonraki tura bırakılıyor.
-- **Otomatik test yazılmadı.** Doğrulama, iki proje birlikte çalıştırılıp Slack'e düşen mesajlar gözlenerek yapıldı.
 
 ## Kullanılan Teknolojiler
 
