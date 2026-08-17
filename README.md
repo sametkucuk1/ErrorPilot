@@ -36,7 +36,7 @@ ErrorPilotEngine, aynı hatayı iki kez işlememek için bir watermark mekanizma
 
 Zincirin sonunda `#errorpilot-alerts` kanalına düşen bildirim: hatanın tipi, oluştuğu uygulama ve zaman bilgisi, hata mesajı ve Gemini'nin ürettiği Türkçe çözüm önerisi.
 
-![ErrorPilot'un Slack kanalına gönderdiği hata bildirimi](.github/slack-bildirimi.png)
+![ErrorPilot'un Slack kanalına gönderdiği hata bildirimi](https://raw.githubusercontent.com/sametkucuk1/ErrorPilot/assets/slack-bildirimi.png)
 
 Sistemin uçtan uca çalışmasını gösteren sunum videosu: [sunumvideosu.mp4](sunumvideosu.mp4)
 
