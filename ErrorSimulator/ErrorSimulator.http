@@ -1,6 +1,6 @@
 @ErrorSimulator_HostAddress = http://localhost:5049
 
-GET {{ErrorSimulator_HostAddress}}/weatherforecast/
+GET {{ErrorSimulator_HostAddress}}/api/errors/trigger
 Accept: application/json
 
 ###

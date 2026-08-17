@@ -4,8 +4,7 @@ public static class RandomErrorFactory
 {
     public static Exception CreateAndLog(ILogger logger, string source)
     {
-        // Thrown rather than just constructed so the exception carries a real
-        // stack trace when it reaches the logging pipeline.
+       
         try
         {
             throw Create();
