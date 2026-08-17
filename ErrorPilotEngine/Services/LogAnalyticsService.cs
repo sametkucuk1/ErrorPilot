@@ -12,6 +12,8 @@ public class LogAnalyticsService : ILogAnalyticsService
 {
     private const string LatestErrorsQuery = "AppExceptions | order by TimeGenerated desc | take 10";
 
+    // İşaretçiden sonraki hataları eskiden yeniye doğru çekiyoruz; tek seferde alınacak kayıt
+    // sayısı sınırlı, artakalanlar bir sonraki turda işleniyor.
     private const string NewErrorsQueryFormat =
         "AppExceptions | where TimeGenerated > datetime({0}) | order by TimeGenerated asc | take {1}";
 

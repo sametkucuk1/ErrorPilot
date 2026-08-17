@@ -3,6 +3,9 @@ using ErrorPilotEngine.Models;
 
 namespace ErrorPilotEngine.Services;
 
+// Gemini'ye gönderilen isteği hazırlıyor. Log Analytics bazı alanları boş döndürebildiği için
+// yalnızca dolu olan alanlar prompt'a ekleniyor; boş satırlar modeli gereksiz yere yanıltıyor.
+// Cevabın kısa ve maddeler halinde istenmesi, Slack mesajının okunabilir kalması için.
 public static class ErrorAnalysisPromptBuilder
 {
     private const string UnknownValue = "bilinmiyor";

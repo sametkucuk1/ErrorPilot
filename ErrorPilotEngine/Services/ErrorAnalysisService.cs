@@ -38,12 +38,15 @@ public class ErrorAnalysisService : IErrorAnalysisService
         {
             var error = errors[index];
 
+            // Gemini'nin ücretsiz kotası dolduğunda tekrar denemek anlamsız; kalan hataları
+            // "atlandı" olarak işaretleyip raporda gösteriyoruz ki hangileri işlenmedi belli olsun.
             if (rateLimitReached)
             {
                 results.Add(CreateSkippedResult(error));
                 continue;
             }
 
+            // İstekler arasında kısa bir bekleme, dakikalık istek limitine takılmayı geciktiriyor.
             if (index > 0)
             {
                 await Task.Delay(
